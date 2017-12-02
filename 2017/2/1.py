@@ -1,7 +1,4 @@
 with open('input') as f:
-    s = 0
-    ss = []
-    for line in f.readlines():
-        a = map(int, line.split())
-        ss.append(max(a) - min(a))
-    print(sum(ss))
+    dMinMax = lambda a: max(a) - min(a)
+    lineToNums = lambda line: map(int, line.split())
+    sum(map(dMinMax, map(lineToNums, f.readlines())))

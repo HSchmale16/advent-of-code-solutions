@@ -20,7 +20,6 @@ def go_dir(dx, dy, dr):
     return dx, dy
 
 def exec_line(line, dx, dy):
-    dx, dy = (1, 1)
     for c in line:
         dx, dy = go_dir(dx, dy, c) 
     return dx, dy

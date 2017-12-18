@@ -1,3 +1,4 @@
+import copy
 import sys
 
 def load_firewall(fname):
@@ -26,10 +27,37 @@ def step_firewall(fwall):
         firewall[i] = (place, max_depth, down) 
     return firewall, poses
 
+def step_n(n, firewall):
+    from_state = max(step_n.prevs)
+    if n > from_state:
+        steps = n - from_state
+        firewall = step_n.prevs[from_state]
+    else:
+        return step_n.prevs[n] 
+    for i in range(steps):
+        firewall = step_firewall(firewall)
+    step_n.prevs[n] = copy.copy(firewall)
+    return firewall
 
-firewall = load_firewall(sys.argv[1])
-print(firewall)
-for i in range(4):
-    firewall = step_firewall(firewall)
-    print(firewall)
+def sim_firewall_run(delay, firewall):
+    firewall = copy.deepcopy(firewall)
+    firewall = step_n(delay, firewall)
+    pentalty = 0
+    for i in range(len(firewall[0])):
+        if i in firewall[1] and firewall[0][i][0] == 0:
+            pentalty += i * firewall[0][i][1]
+            if pentalty != 0:
+                break
+        firewall = step_firewall(firewall)
+    return pentalty
+def main():
+    firewall = load_firewall(sys.argv[1])
+    step_n.prevs = {0: copy.copy(firewall)}
 
+    for i in range(20000):
+        pen = sim_firewall_run(i, firewall)
+        print(i, pen)
+        if pen == 0:
+            break
+
+if __name__ == '__main__': main()

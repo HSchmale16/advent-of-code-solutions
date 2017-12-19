@@ -29,20 +29,11 @@ def join(dancers):
     return ''.join(dancers)
 
 do_x_times = 1_000_000_000
-previous = {}
+previous = []
 for i in range(1000):
     jd = join(dancers)
     if jd in previous:
-        times = i - previous[jd]
-        print(i, times)
+        print(previous[do_x_times % i])
         break
-    else:
-        previous[jd] = i
+    previous.append(jd)
     dancers = do_dance(dancers)
-
-target = (do_x_times - 1) % times
-print(target)
-
-for k, v in previous.items():
-    if v == target:
-        print(k)

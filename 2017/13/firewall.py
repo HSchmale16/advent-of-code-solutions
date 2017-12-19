@@ -2,57 +2,40 @@ import copy
 import sys
 
 def load_firewall(fname):
-    poses = []
-    depths = []
     with open(fname) as f:
+        wall = {}
         for line in f.readlines():
             pos, depth = (int(x) for x in line.split(':'))
-            poses.append(pos)
-            depths.append(depth)
-    firewall = [None for i in range(max(poses) + 1)]
-    for p,d in zip(poses, depths):
-        firewall[p] = (0, d, True)
-    return firewall,poses
+            wall[pos] = (0, depth - 1, True)
+    return wall
 
 def step_firewall(fwall):
-    firewall, poses = fwall
-    for i in poses:
-        place, max_depth, down = firewall[i]
+    for k, v in fwall.items():
+        pos, depth, down = v
         if down:
-            place += 1
+            pos += 1
         else:
-            place -= 1
-        if place == (max_depth - 1) or place == 0:
+            pos -= 1
+        if pos == depth or pos == 0:
             down = not down
-        firewall[i] = (place, max_depth, down) 
-    return firewall, poses
+        fwall[k] = (pos, depth, down)
+    print(fwall)
+    return fwall
 
-def step_n(n, firewall):
-    from_state = max(step_n.prevs)
-    if n > from_state:
-        steps = n - from_state
-        firewall = step_n.prevs[from_state]
-    else:
-        return step_n.prevs[n] 
-    for i in range(steps):
-        firewall = step_firewall(firewall)
-    step_n.prevs[n] = copy.copy(firewall)
-    return firewall
 
-def sim_firewall_run(delay, firewall):
-    firewall = copy.deepcopy(firewall)
-    firewall = step_n(delay, firewall)
+
+def sim_firewall_run(delay, wall):
     pentalty = 0
-    for i in range(len(firewall[0])):
-        if i in firewall[1] and firewall[0][i][0] == 0:
-            pentalty += i * firewall[0][i][1]
-            if pentalty != 0:
-                break
-        firewall = step_firewall(firewall)
+    for i in range(max(wall)):
+        try:
+            if wall[i][0] == 0:
+                pentalty += i * wall[i][1]
+        except KeyError: pass
+        wall = step_firewall(wall)
     return pentalty
+
 def main():
     firewall = load_firewall(sys.argv[1])
-    step_n.prevs = {0: copy.copy(firewall)}
 
     for i in range(20000):
         pen = sim_firewall_run(i, firewall)

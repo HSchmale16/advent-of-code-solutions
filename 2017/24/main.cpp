@@ -39,13 +39,21 @@ struct SolutionTree {
     LadderPiece value;
 };
 
-int sumTreeBranch (const SolutionTree& t, vector<unsigned>& v, int value) {
+void sumTreeBranch (const SolutionTree& t, vector<unsigned>& v, int value) {
     if(t.childs.empty()) {
         v.push_back(value + t.value.u + t.value.v);
-        return 0;
     }
-    for (SolutionTree c : t.childs) {
+    for (const SolutionTree& c : t.childs) {
         sumTreeBranch(c, v, value + t.value.u + t.value.v);
+    }
+}
+
+void treeDepths(const SolutionTree& t, vector<unsigned>& v, int value) {
+    if(t.childs.empty()) {
+       v.push_back(value + 1);
+    }
+    for (const SolutionTree& c : t.childs) {
+        treeDepths(c, v, value + 1);
     }
 }
 
@@ -73,10 +81,17 @@ int main (int argc, char** argv)
     buildTree (pieces, 0, t);
     
 
-    vector<unsigned> vals;
-    sumTreeBranch(t, vals, 0);
+    vector<unsigned> strs, lens;
+    sumTreeBranch(t, strs, 0);
+    treeDepths(t, lens, 0);
 
-    cout << *max_element(vals.begin(), vals.end()) << endl;
-
+    cout << *max_element(strs.begin(), strs.end()) << endl;
+    unsigned max_length = *max_element(lens.begin(), lens.end());
+    for(size_t i = 0; i < lens.size(); ++i) {
+        if (lens[i] == max_length) {
+            cout << strs[i] << " " << lens[i] << endl;
+        }
+    }
+    
     return 0;
 }

@@ -1,0 +1,3 @@
+# Run like:
+
+sort -n input.txt | ./a.out

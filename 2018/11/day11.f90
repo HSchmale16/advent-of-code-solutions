@@ -1,7 +1,8 @@
 program day11
     implicit none
-    integer, dimension(1:300,1:300) :: grid, g3x3
-    integer :: i, x, y, j, serialNum, cmax, maxx, maxy
+    
+    integer, dimension(1:300,1:300) :: grid, res 
+    integer :: i, x, y, j, serialNum, cmax, maxx, maxy, maxi
 
     read(*,*) serialNum
 
@@ -13,31 +14,44 @@ program day11
 
         end do
     end do
-    
+
+    maxi = 0 
     cmax = 0
-    do x = 2, 299
-        do y = 2, 299
-            i = sum3x3(grid, x, y)
-            if (i .gt. cmax) then
-                cmax = i
-                maxx = x
-                maxy = y
-            end if 
+    do i = 0, 299
+        do y = 1, 300 - i
+            do x = 1, 300 - i
+                j = sumNxN(grid, x, y, i)
+                if (j .gt. cmax) then
+                    cmax = j
+                    maxi = i
+                    maxx = x
+                    maxy = y
+                end if 
+            end do
         end do
-    end do
-   
-    write(*,*) "Part 1 = ", maxx - 1, maxy - 1, cmax
-      
-contains 
+        ! i is off by 1 since we are making a grid size by blah
+        if (i .eq. 2) then 
+            write(*,*) "Part 1 = ", maxx, maxy, cmax
+        end if 
+    end do  
+    
+    write(*,*) "Part 2 = ", maxx, maxy, maxi + 1, cmax
+     
 
-    function sum3x3 (g, x, y) result(s) 
-        integer :: g(1:300,1:300), x, y, s, i, j
-
+contains
+    ! Assumes res is passed back in each time, and n in counted up from the beginning.
+    ! x and y are the top left coord 
+    function sumNxN(g, x, y, n) result(s)
+        integer :: g(1:300, 1:300), x, y, i, j, s, n 
+        
         s = 0
-        do i = -1, 1
-            do j = -1, 1
-                s = s + g(x + i, y + j)
+        do i = 0, n
+            do j = 0, n
+                s = s + g(x+j,y+i)
             end do
         end do 
-    end function sum3x3
+    end function sumNxN
+
+
+
 end program day11

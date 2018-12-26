@@ -1,81 +1,118 @@
-#include <vector>
-#include <algorithm>
+#include <array>
+#include <map>
 #include <cstdio>
-#include <utility>
+#include <vector>
 #include <cmath>
+#include <algorithm>
 
-using namespace std;
+const size_t GRID_SIZE = 1000;
+using std::array;
 
-inline size_t
-taxicab(pair<int,int> a, pair<int,int> b) {
-    return abs(a.first - b.first) + abs(a.second - b.second);
-}
 
-int
-owner(pair<int,int> point, vector<pair<int,int>> points) {
-    int minValue = 1000000;
-    int prevMin = 0;
-    int minOwner = -1;
-    for (int i = 0; i < points.size(); ++i) {
-        size_t dis = taxicab(point, points[i]);
-        if (dis <= minValue) {
-            prevMin = minValue;
-            minValue = dis;
-            minOwner = i;
-        }
-    }
-    if (prevMin == minValue)
-        return -1;
-    return minOwner;
-}
+struct GridPoint {
+    int owner = -1;
+};
 
-int
-main() {
-    vector<pair<int,int>> pairs;
+using Grid = std::array<std::array<GridPoint, GRID_SIZE>, GRID_SIZE>; 
 
+
+
+struct Coord {
     int x, y;
-    while(scanf("%d, %d\n", &x, &y) != EOF) {
-        pairs.push_back({x,y});
-    }
-    int grid[400][400] = {-1};
+    bool infinite = false;
     
-    for(int i = 0; i < pairs.size(); ++i) {
-        grid[pairs[i].first][pairs[i].second] = i;
+    Coord (int x0, int y0) : x(x0), y(y0) {}
+};
+
+inline int
+manhatten(const Coord& a, int x, int y) {
+    return abs(a.x - x) + abs(a.y - y);
+}
+
+int
+determineOwner(int x, int y, const std::vector<Coord>& coords) {
+    // Distance -> List<CoordId> 
+    std::map<int, std::vector<int>> distances; 
+    for (int i = 0; i < coords.size(); ++i) {
+        int dis = manhatten(coords[i], x, y);
+        distances[dis].push_back(i); 
+        if (distances[dis].size() > 1)
+            return -1;
+    }
+    auto p = *distances.begin();
+    return p.second[0];
+} 
+
+void
+dumpGrid(const Grid& g) {
+    for (auto rows : g) {
+        for (auto col : rows) {
+            printf("%02d ", col.owner);
+        }
+        printf("\n");
+    }
+}
+
+array<int, 4>
+determineInfiniteCoords (std::vector<Coord>& coords) {
+    array<int, 4> vals;
+    
+    auto CompareX = [](auto a, auto b) {
+        return a.x < b.x;
+    };
+    auto xmin = std::minmax_element(coords.begin(), coords.end(), CompareX); 
+
+    auto CompareY = [](auto a, auto b) {
+        return a.y < b.y;
+    };
+    auto ymin = std::minmax_element(coords.begin(), coords.end(), CompareY); 
+
+    return vals;
+}
+
+int 
+main() {
+    std::vector<Coord> coords;
+    Grid grid;
+
+    {
+        int x, y;
+        while (scanf("%d, %d\n", &x, &y) != EOF) {
+            coords.push_back(Coord(x, y));
+        } 
     }
 
 
-    for (int i = 0; i < 400; ++i) {
-        for(int j = 0; j < 400; ++j) {
-            if (grid[i][j] == -1) {
-                grid[i][j] = owner({i, j}, pairs);        
-            }
+
+    auto x = determineInfiniteCoords(coords);
+    for (int i = x[2]; i < x[3]; ++i) {
+        for (int j = x[0]; j < x[1]; ++j) {
+            int owner = determineOwner(i, j, coords);
+            // flip flop so rendered right
+            grid[j][i].owner = owner;
         }
     }
-    
-    vector<bool> failures(pairs.size());
-    for (int i = 0; i < 400; ++i) {
-        failures[grid[i][0]] = true;
-        failures[grid[0][i]] = true;
-        failures[grid[399][i]] = true;
-        failures[grid[i][399]] = true;
+
+    // Count by owner
+    std::map<int,size_t> counts; 
+    for (int i = 0; i < GRID_SIZE; ++i) {
+        for (int j = 0; j < GRID_SIZE; ++j) {
+            counts[grid[i][j].owner]++;
+        }
+    }
+
+    int max_area = 0;
+    int max_value = -1;
+    for (const auto& p : counts) {
+        if (p.first != -1 && !coords[p.first].infinite && p.second < 11412) {
+            if (p.second > max_area) {
+                max_area = p.second;
+                max_value = p.first;
+            } 
+        }
     } 
+    
+    printf("max-area=%d, max-value=%d\n", max_area, max_value);
 
-    vector<size_t> counts(pairs.size()); 
-
-    for (int i = 0; i < 400; ++i) {
-        for(int j = 0; j < 400; ++j) {
-            counts[grid[i][j]]++;
-        }
-    }
-
-    int maxValue = 0;
-
-    for (int i = 0; i < pairs.size(); ++i) {
-        if (!failures[i] && counts[i] > maxValue) {
-            maxValue = counts[i];
-        }
-    }
-    printf("%d\n", maxValue);
-
-    return EXIT_SUCCESS;
+    return 0;
 }

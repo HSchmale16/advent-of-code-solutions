@@ -11,7 +11,7 @@ using std::endl;
 
 inline bool
 areOppositeCharacters(char a, char b) {
-    return std::max(a, b) - std::min(a, b) == 32; 
+    return (char)(a ^ b) == (char)32; 
 }
 
 size_t
@@ -19,7 +19,7 @@ collapse(string line) {
     bool reactionHappened;
     do {
         reactionHappened = false;
-        for(auto it = line.begin(); it != line.end(); ++it) {
+        for (auto it = line.begin(); it != line.end(); ++it) {
             if (areOppositeCharacters(*it, *(it + 1))) {
                 line.erase(it, it+2);
                 reactionHappened = true;
@@ -32,11 +32,11 @@ collapse(string line) {
 
 string
 removeUnitType(char c, string s) {
-    char r1 = tolower(c), r2 = toupper(c);
+    char r2 = toupper(c);
 
     auto it = s.begin();
     while (it != s.end()) {
-        if(*it == r1 || *it == r2)
+        if(*it == c || *it == r2)
             s.erase(it);
         else
             ++it;

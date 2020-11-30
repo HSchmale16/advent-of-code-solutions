@@ -10,10 +10,23 @@ while True:
     except EOFError:
         break
 
-ordering = nx.lexicographical_topological_sort(g)
+ordering = list(nx.lexicographical_topological_sort(g))
+print (*ordering)
 # Part 1 done
 
 # Part 2
+STEP_INCR = 60
+
+
+class Worker:
+    def __init__(self, step):
+        self.time_remaining = ord(step) - ord('A') + STEP_INCR
+        self.step = step
+
+
+
+done_steps = set()
+timestep = 0
 
 
 

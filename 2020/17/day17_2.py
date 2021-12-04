@@ -64,10 +64,6 @@ def to_be_active(point : Tuple[int,int,int,int], pbox : PointsBox):
     # otherwise only turn on w/ exactly 3 neighbors
     return count == 3
 
-
-    
-
-
 points = PointsBox()
 for y, line in enumerate(map(str.strip, sys.stdin.readlines())):
     for x, c in enumerate(line):

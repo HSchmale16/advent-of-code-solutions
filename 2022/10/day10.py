@@ -12,8 +12,14 @@ def proc_cycle():
     global strength
     if pc in targets:
         strength += pc * x
-        print(x, pc, strength)
+        #print(x, pc, strength)
+    pixel = (pc-1) % 40
+    if pixel == 0:
+        print()
+    c = '#' if pixel in [x-1, x, x+1] else '.'
+    print(c, end='')
 
+proc_cycle()
 for c in cmds:
     if len(c) == 1:
         pc += 1
